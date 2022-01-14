@@ -1,0 +1,21 @@
+// importation du package jsonwebtoken
+const jwt = require('jsonwebtoken')
+
+module.exports = (req, res, next) => {
+	try {
+		// on utilise split pour récupérer le token après Bearer dans le header
+		const token = req.headers.authorization.split(' ')[1]
+		// la fonction verifie et décode notre token
+		const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET')
+		// on extrait l'ID user de notre token
+		const userId = decodedToken.userId
+		req.auth = { userId }
+		if (req.body.userId && req.body.userId !== userId) {
+			throw 'Invalid user ID'
+		} else {
+			next()
+		}
+	} catch {
+		res.status(401).json({error: new Error('Invalid request!'),})
+	}
+}
